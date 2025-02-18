@@ -8,10 +8,10 @@ DEBUG_FLAGS=-DSCHNEIDER_DEBUG
 all : bin/gest_ress bin/client_train bin/example_schneider libs
 
 bin/gest_ress : src/gest_ress.c
-	gcc $^ -o $@ -Iinclude
+	gcc $(CFLAGS) $(CPFLAGS) $(LDFLAGS) $^ -o $@ -Iinclude
 
 bin/client_train : src/client_train.c
-	gcc $^ -o $@
+	gcc $(CFLAGS) $(CPFLAGS) $(LDFLAGS) $^ -o $@
 
 libs: lib/libschneider.so
 
