@@ -2,6 +2,9 @@ CPFLAGS=-I./
 LDFLAGS=-L./lib
 CFLAGS=-Wall
 
+# Add debug flag for compilation
+DEBUG_FLAGS=-DSCHNEIDER_DEBUG
+
 all : bin/gest_ress bin/client_train bin/example_schneider libs
 
 bin/gest_ress : src/gest_ress.c
@@ -20,6 +23,9 @@ lib/libschneider.so: build/schneider-fpic.o
 
 build/schneider-fpic.o: src/schneider.c
 	gcc -c -fPIC $(CFLAGS) $(CPFLAGS) $< -o $@
+
+debug: CFLAGS += $(DEBUG_FLAGS)
+debug: clean clean-libs all
 
 clean:
 	rm -f bin/* build/*
