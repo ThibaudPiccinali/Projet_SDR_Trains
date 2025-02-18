@@ -55,6 +55,7 @@ int main(int argc, char * argv[]){
     write_info->troncon = 0x0000;
     write_info->aiguillage = 0xFFFF; // si l'un est à une valeur, l'autre doit être à 0xFFFF
 
+    // chaque train à un numéro qui lui est associé. À écrire une seule fois au début
     write_info->adresse_premier_mot = 39; // dépendant du train qui fait la requete
 
     transmit_command(sd, "write", pc_adress, api_xway_adress, write_info);
