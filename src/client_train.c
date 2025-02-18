@@ -11,12 +11,34 @@
                                     { perror(msg); \
                                         exit(EXIT_FAILURE); }
 
-#define REMOTEPORT   3000
-#define LOCALIP     "127.0.0.1"
-#define REMOTE     "127.0.0.1"
+#define DEFAULT_REMOTEPORT   8080
+#define DEFAULT_REMOTE_IP     "127.0.0.1"
 #define MAXOCTETS   150
 
+#define IP_SIZE 16
+char ip[IP_SIZE];
+int port;
+
 int main(int argc, char *argv[]) {
+    
+    if(argc == 2){
+        port = atoi(argv[1]);
+        strncpy(ip, DEFAULT_REMOTE_IP, IP_SIZE - 1);
+        ip[IP_SIZE - 1] = '\0';
+    }
+    else if(argc == 3){
+        port = atoi(argv[1]);
+        strncpy(ip, argv[2], IP_SIZE - 1);
+        ip[IP_SIZE - 1] = '\0';
+    }
+    else{
+        port = DEFAULT_REMOTEPORT;
+        strncpy(ip, DEFAULT_REMOTE_IP, IP_SIZE - 1);
+        ip[IP_SIZE - 1] = '\0';
+    }
+
+    printf("Adresse IP distante : %s, Port : %d\n",ip,port);
+    
     int sd ;
     struct sockaddr_in adrlect;
     socklen_t adrlect_len;
@@ -36,38 +58,40 @@ int main(int argc, char *argv[]) {
     
     // Préparation de l'adresse de la socket
     adrlect.sin_family = AF_INET;
-    adrlect.sin_port = htons(REMOTEPORT);
-    adrlect.sin_addr.s_addr = inet_addr(REMOTE);
+    adrlect.sin_port = htons(port);
+    adrlect.sin_addr.s_addr = inet_addr(ip);
     
     // Connexion au serveur distant
     erreur = connect(sd, (struct sockaddr *)&adrlect, adrlect_len);
     CHECK_ERROR(erreur, -1, "Erreur de connexion !!!\n");
 
-
-    // Envoi du message au serveur
     printf("0 -> demande de mutex\n1 -> restitution de mutex\nExemple : 05 -> demande mutex 5\n");
-    printf("CLIENT> ");
-    fgets(buff_emission, MAXOCTETS, stdin);
-    buff_emission[strlen(buff_emission) - 1] = '\0';
-    nbcar = send(sd, buff_emission, strlen(buff_emission) + 1, 0);
-    CHECK_ERROR(nbcar, 0, "\nProblème d'émission !!!\n");
+
+    while(1){
+        // Envoi du message au serveur
+        printf("CLIENT> ");
+        fgets(buff_emission, MAXOCTETS, stdin);
+        buff_emission[strlen(buff_emission) - 1] = '\0';
+        nbcar = send(sd, buff_emission, strlen(buff_emission) + 1, 0);
+        CHECK_ERROR(nbcar, 0, "\nProblème d'émission !!!\n");
 
 
-    // Réception du message du serveur
-    nbcar = recv(sd, buff_reception, MAXOCTETS, 0);
-    CHECK_ERROR(nbcar, -1, "\nProblème de réception !!!\n");
-    buff_reception[nbcar] = '\0';
-    printf("MSG RECU DU SERVEUR : %s\n", buff_reception);
-
-    if(strcmp(message_mutex_demandee,buff_reception)==0){
         // Réception du message du serveur
         nbcar = recv(sd, buff_reception, MAXOCTETS, 0);
         CHECK_ERROR(nbcar, -1, "\nProblème de réception !!!\n");
         buff_reception[nbcar] = '\0';
         printf("MSG RECU DU SERVEUR : %s\n", buff_reception);
+
+        if(strcmp(message_mutex_demandee,buff_reception)==0){
+            printf("On attends la mutex\n");
+            // Réception du message du serveur
+            nbcar = recv(sd, buff_reception, MAXOCTETS, 0);
+            CHECK_ERROR(nbcar, -1, "\nProblème de réception !!!\n");
+            buff_reception[nbcar] = '\0';
+            printf("MSG RECU DU SERVEUR : %s\n", buff_reception);
+        }
+
     }
-
     CHECK_ERROR(close(sd), -1, "Erreur lors de la fermeture de la socket");
-
     exit(EXIT_SUCCESS);
 }
