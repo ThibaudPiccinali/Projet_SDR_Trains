@@ -73,43 +73,55 @@ void handle_communication(int sd, u_int8_t * buff_emission, u_int8_t * buff_rece
     // Envoi du message au serveur
     nbcar = write(sd, buff_emission, total_length);
     CHECK_ERROR(nbcar, -1, "\nProblème d'émission !!!\n");
+
+    #ifdef SCHNEIDER_DEBUG
     printf("Message envoyé en hexadécimal: ");
     for (int i = 0; i < nbcar; i++) {
         printf("%02X ", buff_emission[i]);
     }
     printf("\n");
+    #endif
 
     // Réception du message du serveur
     nbcar = read(sd, buff_reception, MAXOCTETS);
     CHECK_ERROR(nbcar, -1, "\nProblème de réception !!!\n");
     CHECK_ERROR(nbcar, 0, "\nProblème de réception !!!\n");
+
+    #ifdef SCHNEIDER_DEBUG
     printf("Message reçu en hexadécimal: ");
     for (int i = 0; i < nbcar; i++) {
         printf("%02X ", buff_reception[i]);
     }
     printf("\n");
     printf("Réponse : %s\n", read_response(buff_reception));
-    
+    #endif
+
     // we wait for the train to pass the next sensor
     if (strcmp(user_command, "write") == 0) {
         nbcar = read(sd, buff_reception, MAXOCTETS);
         CHECK_ERROR(nbcar, -1, "\nProblème de réception !!!\n");
         CHECK_ERROR(nbcar, 0, "\nProblème de réception !!!\n");
+
+        #ifdef SCHNEIDER_DEBUG
         printf("Message reçu en hexadécimal: ");
         for (int i = 0; i < nbcar; i++) {
             printf("%02X ", buff_reception[i]);
         }
         printf("\n");
+        #endif
 
         create_frame(buff_emission, 0x09, pc_adress, api_xway_adress, 0x19, buff_reception[13], 0xFE, NULL);
 
         nbcar = write(sd, buff_emission, 0x09 + HEADER_SIZE - 1);
         CHECK_ERROR(nbcar, -1, "\nProblème d'émission !!!\n");
+
+        #ifdef SCHNEIDER_DEBUG
         printf("Message envoyé en hexadécimal: ");
         for (int i = 0; i < nbcar; i++) {
             printf("%02X ", buff_emission[i]);
         }
         printf("\n");
+        #endif
     }
 }
 

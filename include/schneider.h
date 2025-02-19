@@ -17,7 +17,15 @@
 #define HEADER_SIZE 7
 #define MAXOCTETS   150
 
-// write only one value to troncon or aiguillage into this simultanously, the other must me at 0xFFFF
+/**
+ * @brief Structure containing information for writing to a device.
+ *
+ * If troncon is put to a value, aiguillage must be set to 0xFFFF and vice versa.
+ *
+ * @param troncon The section of the track.
+ * @param aiguillage The switch information.
+ * @param adresse_premier_mot The address of the first word. Depends on who uses the request.
+ */
 typedef struct {
     u_int16_t troncon;
     u_int16_t aiguillage;
@@ -30,6 +38,20 @@ void write_unite_request(u_int8_t * frame, int total_length, u_int16_t pc_adress
 void write_command(u_int8_t * frame, u_int8_t command, int starting_byte, u_int16_t pc_adress, WriteInformation * write_info);
 char * read_response(u_int8_t * frame);
 void handle_communication(int sd, u_int8_t * buff_emission, u_int8_t * buff_reception, int pc_adress, int api_xway_adress, int total_length, char * user_command);
+
+/**
+ * @brief Transmits a command to a specified address.
+ *
+ * This function sends a command to a device using the provided socket descriptor.
+ *
+ * @param sd The socket descriptor used for communication.
+ * @param command The command to be transmitted.
+ * @param pc_adress The address of the PC to which the command is sent.
+ * @param api_xway_adress The API XWAY address for the communication.
+ * @param write_info A pointer to a WriteInformation structure containing additional data for the transmission.
+ * 
+ * @exception Stops the thread if the write information is invalid.
+ */
 void transmit_command(int sd, char * command, int pc_adress, int api_xway_adress, WriteInformation * write_info);
 
 #endif
