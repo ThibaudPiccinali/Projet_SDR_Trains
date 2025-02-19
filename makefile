@@ -5,13 +5,22 @@ CFLAGS=-Wall
 # Add debug flag for compilation
 DEBUG_FLAGS=-DSCHNEIDER_DEBUG
 
-all : bin/gest_ress bin/client_train bin/example_schneider libs
+all : bin/gest_ress clients bin/example_schneider libs
 
 bin/gest_ress : src/gest_ress.c
 	gcc $(CFLAGS) $(CPFLAGS) $(LDFLAGS) $^ -o $@ -Iinclude
 
+clients: bin/client_train bin/client_train_1 bin/client_train_2
+
 bin/client_train : src/client_train.c
 	gcc $(CFLAGS) $(CPFLAGS) $(LDFLAGS) $^ -o $@
+
+bin/client_train_1 : src/client_train_1.c lib/libschneider.so
+	gcc $(CFLAGS) $(CPFLAGS) $(LDFLAGS) $^ -o $@ 
+
+bin/client_train_2 : src/client_train_2.c lib/libschneider.so
+	gcc $(CFLAGS) $(CPFLAGS) $(LDFLAGS) $^ -o $@ 
+
 
 libs: lib/libschneider.so
 
