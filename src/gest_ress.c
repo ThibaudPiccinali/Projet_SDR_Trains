@@ -19,7 +19,7 @@
 
 #define NB_TRAINS 4
 
-#define NB_MUTEX 6
+#define NB_MUTEX 7
 #define NB_PROC_MAX_FA 50
 #define MAXOCTETS 150
 
@@ -168,34 +168,34 @@ void train(int no){
             // Demande de Mutex
             strcpy(num_mutex, buff_reception + 1); // Copie à partir du deuxième caractère
             printf("Demande de prise de la mutex %d\n",atoi(num_mutex));
-            if(atoi(num_mutex) < NB_MUTEX){
+            if(atoi(num_mutex) <= NB_MUTEX && atoi(num_mutex) >0){
                 // On rajoute le client sur la file d'attente
-                if(f_a->longueurs[atoi(num_mutex)] < NB_PROC_MAX_FA){
+                if(f_a->longueurs[atoi(num_mutex)-1] < NB_PROC_MAX_FA){
                     sprintf(buff_emission, "Demande Mutex prise en compte");
                     CHECK(nbcar = send(client_sd, buff_emission, strlen(buff_emission) + 1, 0),"Problème d'émission !!!\n");
                     // Je me mets dans la file d'attente
-                    f_a->file[atoi(num_mutex)][f_a->longueurs[atoi(num_mutex)]] = getpid();
-                    f_a->longueurs[atoi(num_mutex)]++;
+                    f_a->file[atoi(num_mutex)-1][f_a->longueurs[atoi(num_mutex)]] = getpid();
+                    f_a->longueurs[atoi(num_mutex)-1]++;
                     // J'attends que ce soit mon tour
                     while(1){
-                        if(f_a->file[atoi(num_mutex)][0]==getpid()){
+                        if(f_a->file[atoi(num_mutex)-1][0]==getpid()){
                             sleep(0.5); // Parce que si il n'y a pas d'attente et que le gestionnaire répond tout de suite, le client n'a pas le temps de capter la réponse
                             break;
                         }
                     }
                     // C'est mon tour
                     // Je demande la mutex
-                    CHECK(sem_wait(mutex[atoi(num_mutex)]),"sem_wait(mutex[atoi(num_mutex)])");
+                    CHECK(sem_wait(mutex[atoi(num_mutex)-1]),"sem_wait(mutex[atoi(num_mutex)])");
                     // Je l'obtiens
                     // On met à jour la file d'attente
                     // Déplacer chaque élément vers la position précédente
                     for (int i = 0; i < f_a->longueurs[atoi(num_mutex)] - 1; i++) {
-                        f_a->file[atoi(num_mutex)][i] = f_a->file[atoi(num_mutex)][i + 1];
+                        f_a->file[atoi(num_mutex)-1][i] = f_a->file[atoi(num_mutex)-1][i + 1];
                     }
                     // Décrémenter la longueur de la file d'attente
-                    f_a->longueurs[atoi(num_mutex)]--;
+                    f_a->longueurs[atoi(num_mutex)-1]--;
                     // Mettre à jour le dernier élément (ici on le met à 0)
-                    f_a->file[atoi(num_mutex)][f_a->longueurs[atoi(num_mutex)]] = 0;
+                    f_a->file[atoi(num_mutex)-1][f_a->longueurs[atoi(num_mutex)-1]] = 0;
                     sprintf(buff_emission, "Mutex obtenue");
                     CHECK(nbcar = send(client_sd, buff_emission, strlen(buff_emission) + 1, 0),"Problème d'émission !!!\n");
                     printf("Mutex %d donnée\n",atoi(num_mutex));
@@ -218,8 +218,8 @@ void train(int no){
             // Restitution de mutex
             strcpy(num_mutex, buff_reception + 1); // Copie à partir du deuxième caractère
             printf("Demande de restitution de la mutex %d\n",atoi(num_mutex));
-            if(atoi(num_mutex) < NB_MUTEX){
-                CHECK(sem_post(mutex[atoi(num_mutex)]),"sem_post(mutex_name)");// On rend dispo la mutex
+            if(atoi(num_mutex) <= NB_MUTEX && atoi(num_mutex) >0){
+                CHECK(sem_post(mutex[atoi(num_mutex)-1]),"sem_post(mutex_name)");// On rend dispo la mutex
                 sprintf(buff_emission, "Mutex restituée"); 
                 printf("Mutex %d restituée\n",atoi(num_mutex));
             }
