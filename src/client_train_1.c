@@ -12,13 +12,15 @@
                                     { perror(msg); \
                                         exit(EXIT_FAILURE); }
 
-#define REMOTEPORT   3000
-#define LOCALIP     "127.0.0.1"
-#define REMOTE     "127.0.0.1"
+#define DEFAULT_REMOTEPORT   3000
+#define DEFAULT_REMOTE_IP     "127.0.0.1"
 #define MAXOCTETS   150
 #define IP_AUTOMATE "10.31.125.14"
 #define XWAY_ADRESS 35
 
+#define IP_SIZE 16
+char ip[IP_SIZE];
+int port;
 
 void init_tcp_socket(int *sd, char *remote_ip, u_int16_t remote_port){
     struct sockaddr_in addr;
@@ -91,9 +93,29 @@ void write_demand(uint16_t troncon, uint16_t aiguillage, uint16_t adresse_mot, i
 
 
 int main(int argc, char *argv[]) {
-    
+
+    /********************************* Rappel ligne de commande  ********************************/
+    printf("Usage: %s <API IP> <API Port>  <API XWAY Adress> <RESS IP> <RESS Port>\n", argv[0]); 
 
     /**************************** Connexion socket de gestion des ressources ********************/
+    
+    if(argc == 5){
+        port = atoi(argv[4]);
+        strncpy(ip, DEFAULT_REMOTE_IP, IP_SIZE - 1);
+        ip[IP_SIZE - 1] = '\0';
+    }
+    else if(argc == 6){
+        port = atoi(argv[4]);
+        strncpy(ip, argv[5], IP_SIZE - 1);
+        ip[IP_SIZE - 1] = '\0';
+    }
+    else{
+        port = DEFAULT_REMOTEPORT;
+        strncpy(ip, DEFAULT_REMOTE_IP, IP_SIZE - 1);
+        ip[IP_SIZE - 1] = '\0';
+    }
+    
+    
     int sd_ress;
 
     char buff_emission[MAXOCTETS+1];
@@ -105,14 +127,14 @@ int main(int argc, char *argv[]) {
     char message_mutex_relachee[MAXOCTETS+1];
     sprintf(message_mutex_relachee, "Mutex restituée");
 
-    init_tcp_socket(&sd_ress, REMOTE, REMOTEPORT); 
+    init_tcp_socket(&sd_ress, ip, port); 
 
     /****************************** Connexion à l'API automate #xway *****************************/
 
     int sd_api;
 
-    if (argc != 4){
-        printf("Usage: %s <API IP> <API Port>  <API XWAY Adress>\n", argv[0]);
+    if (argc < 4){
+        printf("Fail : Attention aux arguments en ligne de commande ! Les 4 premiers sont nécessaires\n");
         exit(EXIT_FAILURE);
     }
 
@@ -211,6 +233,7 @@ int main(int argc, char *argv[]) {
 
 
     CHECK_ERROR(close(sd_ress), -1, "Erreur lors de la fermeture de la socket de gestion des ressources");
+    CHECK_ERROR(close(sd_api), -1, "Erreur lors de la fermeture de la socket de l'API");
 
     exit(EXIT_SUCCESS);
 }
