@@ -203,7 +203,7 @@ int main(int argc, char *argv[]) {
                 break; 
             case(16): // En T24, demande PA0d, A5d, A6d
                 write_demand(0xFFFF, 0x14, 42, sd_api, pc_adress, api_xway_adress, write_info);
-                state = 0;
+                state ++ ;
                 break;
             case(17): // En T24, avec PA0d, A5d, A6d,  demande avancement T24
                 write_demand(0x18, 0xFFFF, 42, sd_api, pc_adress, api_xway_adress, write_info);
