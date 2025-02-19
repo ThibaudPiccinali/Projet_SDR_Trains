@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
@@ -91,11 +92,33 @@ void write_demand(uint16_t troncon, uint16_t aiguillage, uint16_t adresse_mot, i
     transmit_command(sd, "write", pc_adress, api_xway_adress, write_info);
 }
 
+void handle_sigint(int sig) {
+
+    extern int sd_ress, sd_api; 
+
+    if (sd_ress != -1) CHECK_ERROR(close(sd_ress), -1, "Erreur lors de la fermeture de la socket de gestion des ressources");
+    if (sd_api != -1) CHECK_ERROR(close(sd_api), -1, "Erreur lors de la fermeture de la socket de l'API");
+   
+    printf("\nSockets fermées proprement. Fin du programme.\n");
+    exit(EXIT_SUCCESS);
+
+}
 
 int main(int argc, char *argv[]) {
     
     /********************************* Rappel ligne de commande  ********************************/
-    printf("Usage: %s <API IP> <API Port>  <API XWAY Adress> <RESS Port> <RESS IP>\n", argv[0]); 
+    printf("Usage: %s <API IP> <API Port>  <API XWAY Adress> [RESS Port] [RESS IP]\n", argv[0]); 
+    if (argc < 4){
+        printf("Fail : Usage\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /************************************Controle C handler *************************************/
+    struct sigaction sa;
+    sa.sa_handler = handle_sigint; 
+    sa.sa_flags = 0;
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGINT, &sa, NULL);  
 
     /**************************** Connexion socket de gestion des ressources ********************/
     
@@ -115,8 +138,7 @@ int main(int argc, char *argv[]) {
         ip[IP_SIZE - 1] = '\0';
     }
     
-    
-    int sd_ress;
+    static int sd_ress = -1;
 
     char buff_emission[MAXOCTETS+1];
     char buff_reception[MAXOCTETS+1];
@@ -131,12 +153,7 @@ int main(int argc, char *argv[]) {
 
     /****************************** Connexion à l'API automate #xway *****************************/
 
-    int sd_api;
-
-    if (argc < 4){
-        printf("Fail : Attention aux arguments en ligne de commande !Les 4 premiers sont nécessaires\n");
-        exit(EXIT_FAILURE);
-    }
+    static int sd_api = -1;
 
     char * api_ip = argv[1]; // IP de l'API
     u_int16_t api_port = (uint16_t) atoi(argv[2]); // Port TCP ouvert de l'API
