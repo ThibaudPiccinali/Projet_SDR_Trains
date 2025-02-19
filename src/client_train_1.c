@@ -95,7 +95,7 @@ void write_demand(uint16_t troncon, uint16_t aiguillage, uint16_t adresse_mot, i
 int main(int argc, char *argv[]) {
 
     /********************************* Rappel ligne de commande  ********************************/
-    printf("Usage: %s <API IP> <API Port>  <API XWAY Adress> <RESS IP> <RESS Port>\n", argv[0]); 
+    printf("Usage: %s <API IP> <API Port>  <API XWAY Adress> <RESS Port> <RESS IP>\n", argv[0]); 
 
     /**************************** Connexion socket de gestion des ressources ********************/
     
