@@ -37,7 +37,7 @@ void write_mobus_tcp(u_int8_t * frame, int total_length);
 void write_unite_request(u_int8_t * frame, int total_length, u_int16_t pc_adress, u_int16_t server_adress, u_int8_t mode, u_int8_t thread);
 void write_command(u_int8_t * frame, u_int8_t command, int starting_byte, u_int16_t pc_adress, WriteInformation * write_info);
 char * read_response(u_int8_t * frame);
-void handle_communication(int sd, u_int8_t * buff_emission, u_int8_t * buff_reception, int pc_adress, int api_xway_adress, int total_length, char * user_command);
+void handle_communication(int sd, u_int8_t * buff_emission, u_int8_t * buff_reception, int pc_adress, int api_xway_adress, int total_length, char * user_command, WriteInformation write_info);
 
 /**
  * @brief Transmits a command to a specified address.

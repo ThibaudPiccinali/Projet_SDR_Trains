@@ -24,6 +24,7 @@
 #define MAXOCTETS   150
 #define IP_AUTOMATE "10.31.125.14"
 #define XWAY_ADRESS 33
+#define NUM_TRAIN 39
 
 #define IP_SIZE 16
 char ip[IP_SIZE];
@@ -183,12 +184,11 @@ int main(int argc, char *argv[]) {
     while(1){
         switch(state){
             case(0): // En Ti03, demande Tj1d et Pa0d
-                write_demand(0xFFFF, 0x1F, 39, sd_api, pc_adress, api_xway_adress, write_info);
-                printf("ta courgette et ta courge\n"); 
+                write_demand(0xFFFF, 0x1F, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state++;
                 break; 
             case(1): // En Ti03 avec ack Tj1d et Pa0d, demande avancement Tn03
-                write_demand(0x3, 0xFFFF, 39, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0x3, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state++;
                 break;
             case(2): // En T23, demande R6
@@ -196,11 +196,11 @@ int main(int argc, char *argv[]) {
                 state++;
                 break; 
             case(3): // En T23 avec R6, demande Pa2d et Tj2d
-                write_demand(0xFFFF, 0x16, 39, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0xFFFF, 0x16, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state++;
                 break;
             case(4): // En T23 avec R6, Pa2d et Tj2d, demande avancement T23
-                write_demand(0x17, 0xFFFF, 39, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0x17, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state++;
                 break;
             case(5): // En Ti10, relache R6
@@ -216,11 +216,11 @@ int main(int argc, char *argv[]) {
                 state ++; 
                 break; 
             case(8): // En Ti10 avec R3 et R4, demande Tj3d
-                write_demand( 0xFFFF, 0x21, 39, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand( 0xFFFF, 0x21, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
             case(9): // En Ti10 avec R3 et R4 et Tj3d, demande avancement Tn10
-                write_demand( 0xA, 0xFFFF, 39, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand( 0xA, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
             case(10): // En T29 avec R3 et R4, libère R4
@@ -232,11 +232,11 @@ int main(int argc, char *argv[]) {
                 state ++; 
                 break; 
             case(12): //En T29 avec R3 et R2, demande Pa3b, A11b et !!!A7d!!! (bloquant?)
-                write_demand( 0xFFFF, 0x3, 39, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand( 0xFFFF, 0x3, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
             case(13): //En T29 avec R3 et R2, Pa3b, A11b et A7d , demande avancement T29
-                write_demand( 0x1D, 0xFFFF, 39, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand( 0x1D, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
             case(14): // En T19, avec R3 et R2, relache R3
@@ -248,7 +248,7 @@ int main(int argc, char *argv[]) {
                 state ++; 
                 break; 
             case(16): // En T19, demande T19
-                write_demand(0x13, 0xFFFF, 39, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0x13, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state = 0;
                 break;
         }

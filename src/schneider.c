@@ -68,7 +68,7 @@ char * read_response(u_int8_t * frame){
     }
 }
 
-void handle_communication(int sd, u_int8_t * buff_emission, u_int8_t * buff_reception, int pc_adress, int api_xway_adress, int total_length, char * user_command){
+void handle_communication(int sd, u_int8_t * buff_emission, u_int8_t * buff_reception, int pc_adress, int api_xway_adress, int total_length, char * user_command, WriteInformation write_info){
     int nbcar;
     // Envoi du message au serveur
     nbcar = write(sd, buff_emission, total_length);
@@ -96,8 +96,12 @@ void handle_communication(int sd, u_int8_t * buff_emission, u_int8_t * buff_rece
     printf("Réponse : %s\n", read_response(buff_reception));
     #endif
 
-    // we wait for the train to pass the next sensor
-    if (strcmp(user_command, "write") == 0) {
+    // we wait for the train to pass the next sensor (we write a troncon)
+    if (strcmp(user_command, "write") == 0 && write_info.aiguillage == 0xFFFF) {
+        #ifdef SCHNEIDER_DEBUG
+        printf("En attente de message de l'automate\n");
+        #endif
+
         nbcar = read(sd, buff_reception, MAXOCTETS);
         CHECK_ERROR(nbcar, -1, "\nProblème de réception !!!\n");
         CHECK_ERROR(nbcar, 0, "\nProblème de réception !!!\n");
@@ -152,5 +156,5 @@ void transmit_command(int sd, char * command, int pc_adress, int api_xway_adress
         perror("Invalid command. Valid commands are: start, stop, write\n");
         exit(EXIT_FAILURE);
     }
-    handle_communication(sd, buff_emission, buff_reception, pc_adress, api_xway_adress, total_length, command);
+    handle_communication(sd, buff_emission, buff_reception, pc_adress, api_xway_adress, total_length, command, *write_info);
 }
