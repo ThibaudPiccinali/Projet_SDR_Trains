@@ -3,7 +3,7 @@
 void create_frame(u_int8_t * frame, int total_length, u_int16_t pc_adress, u_int16_t server_adress, u_int8_t mode, u_int8_t thread, u_int8_t command, WriteInformation * write_info){
     write_mobus_tcp(frame, total_length);
     write_unite_request(frame, total_length, pc_adress, server_adress, mode, thread);
-    write_command(frame, command, HEADER_SIZE, pc_adress, write_info);
+    write_command(frame, command, HEADER_SIZE + 7 , pc_adress, write_info);
 }
 
 void write_mobus_tcp(u_int8_t * frame, int total_length){

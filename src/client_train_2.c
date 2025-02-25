@@ -23,6 +23,9 @@
 char ip[IP_SIZE];
 int port;
 
+static int sd_api = -1;
+static int sd_ress = -1;
+
 void init_tcp_socket(int *sd, char *remote_ip, u_int16_t remote_port){
     struct sockaddr_in addr;
     socklen_t addr_len = sizeof(addr);
@@ -94,8 +97,6 @@ void write_demand(uint16_t troncon, uint16_t aiguillage, uint16_t adresse_mot, i
 
 void handle_sigint(int sig) {
 
-    extern int sd_ress, sd_api; 
-
     if (sd_ress != -1) CHECK_ERROR(close(sd_ress), -1, "Erreur lors de la fermeture de la socket de gestion des ressources");
     if (sd_api != -1) CHECK_ERROR(close(sd_api), -1, "Erreur lors de la fermeture de la socket de l'API");
    
@@ -137,8 +138,6 @@ int main(int argc, char *argv[]) {
         strncpy(ip, DEFAULT_REMOTE_IP, IP_SIZE - 1);
         ip[IP_SIZE - 1] = '\0';
     }
-    
-    static int sd_ress = -1;
 
     char buff_emission[MAXOCTETS+1];
     char buff_reception[MAXOCTETS+1];
@@ -152,8 +151,6 @@ int main(int argc, char *argv[]) {
     init_tcp_socket(&sd_ress, ip, port); 
 
     /****************************** Connexion à l'API automate #xway *****************************/
-
-    static int sd_api = -1;
 
     char * api_ip = argv[1]; // IP de l'API
     u_int16_t api_port = (uint16_t) atoi(argv[2]); // Port TCP ouvert de l'API

@@ -17,11 +17,15 @@
 #define DEFAULT_REMOTE_IP     "127.0.0.1"
 #define MAXOCTETS   150
 #define IP_AUTOMATE "10.31.125.14"
-#define XWAY_ADRESS 35
+#define XWAY_ADRESS 33
 
 #define IP_SIZE 16
 char ip[IP_SIZE];
 int port;
+
+
+static int sd_api = -1;
+static int sd_ress = -1 ;
 
 void init_tcp_socket(int *sd, char *remote_ip, u_int16_t remote_port){
     struct sockaddr_in addr;
@@ -94,8 +98,6 @@ void write_demand(uint16_t troncon, uint16_t aiguillage, uint16_t adresse_mot, i
 
 void handle_sigint(int sig) {
 
-    extern int sd_ress, sd_api; 
-
     if (sd_ress != -1) CHECK_ERROR(close(sd_ress), -1, "Erreur lors de la fermeture de la socket de gestion des ressources");
     if (sd_api != -1) CHECK_ERROR(close(sd_api), -1, "Erreur lors de la fermeture de la socket de l'API");
    
@@ -139,7 +141,6 @@ int main(int argc, char *argv[]) {
     }
     
     
-    static int sd_ress = -1 ;
 
     char buff_emission[MAXOCTETS+1];
     char buff_reception[MAXOCTETS+1];
@@ -154,13 +155,11 @@ int main(int argc, char *argv[]) {
 
     /****************************** Connexion à l'API automate #xway *****************************/
 
-    static int sd_api = -1;
-
     char * api_ip = argv[1]; // IP de l'API
     u_int16_t api_port = (uint16_t) atoi(argv[2]); // Port TCP ouvert de l'API
     int api_xway_adress = atoi(argv[3]); // Adresse XWAY de l'API
 
-    /*   Création de la socket de dialogue TCP   */
+    /*   Création de la socket de dialogue TCP   */ 
 
     init_tcp_socket(&sd_api, api_ip, api_port);
 
@@ -169,8 +168,8 @@ int main(int argc, char *argv[]) {
     u_int16_t pc_adress = XWAY_ADRESS << 8 | 0x10;
     api_xway_adress = api_xway_adress << 8 | 0x10;
 
-    WriteInformation * write_info = malloc(sizeof(WriteInformation));
-
+    WriteInformation * write_info = (WriteInformation * )malloc(sizeof(WriteInformation)); 
+    CHECK_ERROR(write_info, NULL, "malloc writeinfo");
 
     /****************************** Réseau de pétri du train 1 **********************************/
     int state = 0; 
@@ -179,6 +178,7 @@ int main(int argc, char *argv[]) {
         switch(state){
             case(0): // En Ti03, demande Tj1d et Pa0d
                 write_demand(0xFFFF, 0x1F, 39, sd_api, pc_adress, api_xway_adress, write_info);
+                printf("ta courgette et ta courge\n"); 
                 state++;
                 break; 
             case(1): // En Ti03 avec ack Tj1d et Pa0d, demande avancement Tn03
