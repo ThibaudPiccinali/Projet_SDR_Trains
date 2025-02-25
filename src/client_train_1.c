@@ -1,3 +1,9 @@
+/**
+ * Pour lancer ce code : ./bin/client_train_1 10.31.125.14 502 14
+ * 10.31.125.14 est l'adresse IP de l'automate, elle ne changera jamais 
+ * 502 est son port, toujours la même
+ * 14 est le XWAY, toujours le même également
+ */
 #include <stdio.h>
 #include <signal.h>
 #include <stdlib.h>
