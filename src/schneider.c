@@ -96,8 +96,7 @@ void handle_communication(int sd, u_int8_t * buff_emission, u_int8_t * buff_rece
     printf("Réponse : %s\n", read_response(buff_reception));
     #endif
 
-    // we wait for the train to pass the next sensor (we write a troncon)
-    if (strcmp(user_command, "write") == 0 && write_info.aiguillage == 0xFFFF) {
+    if (strcmp(user_command, "write") == 0 ) {
         #ifdef SCHNEIDER_DEBUG
         printf("En attente de message de l'automate\n");
         #endif
