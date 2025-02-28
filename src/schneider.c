@@ -43,8 +43,8 @@ void write_command(u_int8_t * frame, u_int8_t command, int starting_byte, u_int1
         frame[starting_byte + 5] = adresse_premier_mot >> 8;
         frame[starting_byte + 6] = 3 & 0xFF; // on écrit 3 mots pour activer un tronçon ou un aiguillage
         frame[starting_byte + 7] = 3 >> 8;
-        frame[starting_byte + 8] = pc_adress & 0xFF;
-        frame[starting_byte + 9] = pc_adress >> 8;
+        frame[starting_byte + 8] = pc_adress >> 8;
+        frame[starting_byte + 9] = 0; //pc_adress & 0xFF;
         frame[starting_byte + 10] = troncon & 0xFF;
         frame[starting_byte + 11] = troncon >> 8;
         frame[starting_byte + 12] = aiguillage & 0xFF;
@@ -84,8 +84,8 @@ void handle_communication(int sd, u_int8_t * buff_emission, u_int8_t * buff_rece
 
     // Réception du message du serveur
     nbcar = read(sd, buff_reception, MAXOCTETS);
-    CHECK_ERROR(nbcar, -1, "\nProblème de réception !!!\n");
-    CHECK_ERROR(nbcar, 0, "\nProblème de réception !!!\n");
+    CHECK_ERROR(nbcar, -1, "\nProblème de réception (-1)!!!\n");
+    CHECK_ERROR(nbcar, 0, "\nProblème de réception (0)!!!\n");
 
     #ifdef SCHNEIDER_DEBUG
     printf("Message reçu en hexadécimal: ");
@@ -138,17 +138,19 @@ void transmit_command(int sd, char * command, int pc_adress, int api_xway_adress
     u_int8_t buff_emission[MAXOCTETS+1];
     u_int8_t buff_reception[MAXOCTETS+1];
 
+    u_int8_t porte = write_info->adresse_premier_mot & 0xFF ; 
+
     if(strcmp(command, "start") == 0){
-        create_frame(buff_emission, 0x0A, pc_adress, api_xway_adress, 0x09, 0x01, 0x24, NULL);
+        create_frame(buff_emission, 0x0A, pc_adress, api_xway_adress, 0x09, porte, 0x24, NULL);
         total_length = 0x0A + HEADER_SIZE - 1;
     }
     else if(strcmp(command, "stop") == 0){
-        create_frame(buff_emission, 0x0A, pc_adress, api_xway_adress, 0x09, 0x01, 0x25, NULL);
+        create_frame(buff_emission, 0x0A, pc_adress, api_xway_adress, 0x09, porte, 0x25, NULL);
         total_length = 0x0A + HEADER_SIZE - 1;
     }
     else if(strcmp(command, "write") == 0){
         int nombre_de_mot_a_ecrire = 3;
-        create_frame(buff_emission, 16 + 2 * nombre_de_mot_a_ecrire, pc_adress, api_xway_adress, 0x09, 0x01, 0x37, write_info);
+        create_frame(buff_emission, 16 + 2 * nombre_de_mot_a_ecrire, pc_adress, api_xway_adress, 0x09, porte, 0x37, write_info);
         total_length = HEADER_SIZE + 15 + 2 * nombre_de_mot_a_ecrire;
     }
     else{

@@ -255,7 +255,6 @@ int main(int argc, char *argv[]) {
     }
 
 
-
     CHECK_ERROR(close(sd_ress), -1, "Erreur lors de la fermeture de la socket de gestion des ressources");
     CHECK_ERROR(close(sd_api), -1, "Erreur lors de la fermeture de la socket de l'API");
 
