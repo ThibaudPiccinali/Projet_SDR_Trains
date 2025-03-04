@@ -19,7 +19,7 @@
                                     { perror(msg); \
                                         exit(EXIT_FAILURE); }
 
-#define DEFAULT_REMOTEPORT   5000
+#define DEFAULT_REMOTEPORT   8080
 #define DEFAULT_REMOTE_IP     "127.0.0.1"
 #define MAXOCTETS   150
 #define IP_AUTOMATE "10.31.125.14"
@@ -178,96 +178,72 @@ int main(int argc, char *argv[]) {
     WriteInformation * write_info = (WriteInformation * )malloc(sizeof(WriteInformation)); 
     CHECK_ERROR(write_info, NULL, "malloc writeinfo");
 
-
-    /****************************** Réseau de pétri du train 4 **********************************/
+    /****************************** Réseau de pétri du train 3 **********************************/
     int state = 0; 
 
     while(1){
         switch(state){
-        case(0):
-            write_demand(0xFFFF, 0x00, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break; 
-        case(1):
-            write_demand(0xFFFF, 0x16, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break;
-        case(2):
-            write_demand(0x00, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break; 
-        case(3):
-            write_demand(0x0D, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break;
-        case(4):
-            write_demand(0x14, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break;
-        case(5):
-            take_mutex(4, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
-            state++;
-            break; 
-        case(6):
-            take_mutex(5, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
-            state++;
-            break; 
-        case(7):
-            take_mutex(6, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
-            state++;
-            break; 
-        case(8):
-            write_demand(0xFFFF, 0x0E, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break; 
-        case(9):
-            write_demand(0xFFFF, 0x0D, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break; 
-        case(10):
-            write_demand(0xFFFF, 0x15, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break; 
-        case(11):
-            write_demand(0xFFFF, 0x01, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break; 
-        case(12):
-            write_demand(0x1E, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break; 
-        case(13):
-            release_mutex(6, buff_emission, buff_reception, sd_ress, message_mutex_relachee);
-            state++;
-            break; 
-        case(14):
-            write_demand(0x09, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break; 
-        case(15):
-            release_mutex(4, buff_emission, buff_reception, sd_ress, message_mutex_relachee);
-            state++;
-            break; 
-        case(16):
-            release_mutex(5, buff_emission, buff_reception, sd_ress, message_mutex_relachee);
-            state++;
-            break; 
-        case(17):
-            write_demand(0x1F, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break; 
-        case(18):
-            write_demand(0x1A, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break; 
-        case(19):
-            write_demand(0x0F, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break; 
-        case(20):
-            write_demand(0x0C, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-            state++;
-            break;        
+            case(0):
+                take_mutex(1, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
+                take_mutex(3, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
+                state++;
+                break; 
+            case(1):
+                write_demand(0xFFFF, 0x0A, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+                state++;
+                break;
+            case(2):
+                write_demand(0x07, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info); 
+                state++;
+                break; 
+            case(3):
+                release_mutex(1, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+                take_mutex(4, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
+                take_mutex(5, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
+                take_mutex(7, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
+                state++;
+                break;
+            case(4):
+                write_demand(0xFFFF, 0x21, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+                state++;
+                break;
+            case(5):
+                write_demand(0x1D, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+                state ++; 
+                break; 
+            case(6):
+                release_mutex(3, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+                release_mutex(4, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+                write_demand(0x31, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+                state ++; 
+                break; 
+            case(7):
+                write_demand(0xFFFF, 0x0D, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+                state ++; 
+                break; 
+            case(8):
+                write_demand(0x09, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+                state ++; 
+                break; 
+            case(9):
+                release_mutex(5, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+                write_demand(0x1C, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+                state ++; 
+                break; 
+            case(10):
+                take_mutex(1, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
+                state ++; 
+                break; 
+            case(11):
+                write_demand(0xFFFF, 0x17, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+                state ++; 
+                break; 
+            case(12):
+                write_demand(0x1B, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0x25, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+                state = 0; 
+                break;
+
         }
     }
 
