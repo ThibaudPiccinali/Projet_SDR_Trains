@@ -24,6 +24,7 @@
 #define MAXOCTETS   150
 #define IP_AUTOMATE "10.31.125.14"
 #define XWAY_ADRESS 33
+#define NUM_TRAIN 49
 
 #define IP_SIZE 16
 char ip[IP_SIZE];
@@ -188,11 +189,11 @@ int main(int argc, char *argv[]) {
                 state++;
                 break; 
             case(1):
-                write_demand(0xFFFF, 0x0A, 49, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0xFFFF, 0x0A, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state++;
                 break;
             case(2):
-                write_demand(0x07, 0xFFFF, 49, sd_api, pc_adress, api_xway_adress, write_info); 
+                write_demand(0x07, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info); 
                 state++;
                 break; 
             case(3):
@@ -203,30 +204,30 @@ int main(int argc, char *argv[]) {
                 state++;
                 break;
             case(4):
-                write_demand(0xFFFF, 0x21, 49, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0xFFFF, 0x21, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state++;
                 break;
             case(5):
-                write_demand(0x1D, 0xFFFF, 49, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0x1D, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
             case(6):
                 release_mutex(3, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
                 release_mutex(4, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
-                write_demand(0x31, 0xFFFF, 49, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0x31, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
             case(7):
-                write_demand(0xFFFF, 0x0D, 49, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0xFFFF, 0x0D, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
             case(8):
-                write_demand(0x09, 0xFFFF, 49, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0x09, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
             case(9):
                 release_mutex(5, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
-                write_demand(0x1C, 0xFFFF, 49, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0x1C, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
             case(10):
@@ -234,12 +235,12 @@ int main(int argc, char *argv[]) {
                 state ++; 
                 break; 
             case(11):
-                write_demand(0xFFFF, 0x17, 49, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0xFFFF, 0x17, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
             case(12):
-                write_demand(0x1B, 0xFFFF, 49, sd_api, pc_adress, api_xway_adress, write_info);
-                write_demand(0x25, 0xFFFF, 49, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0x1B, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+                write_demand(0x25, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break;
 
