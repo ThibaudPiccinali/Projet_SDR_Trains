@@ -178,71 +178,59 @@ int main(int argc, char *argv[]) {
                 write_demand(0x4, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state++;
                 break; 
-            case(1): // En T22, demande R7
-                take_mutex(7, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
+            case(1): // En T22, demande R1+R2+R7
+                take_mutex(0b1000110, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
                 state++;
                 break;
-            case(2): // En T22 avec R7, demande R1
-                take_mutex(1, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
-                state++;
-                break; 
-            case(3): // En T22 avec R7 et R1, demande R2
-                take_mutex(2, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
-                state++;
-                break;
-            case(4): // En T22 avec R7 et R1 et R2, demande A7d, A11b et PA3d
+            case(2): // En T22 avec R7 et R1 et R2, demande A7d, A11b et PA3d
                 write_demand(0xFFFF, 0x7, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state++;
                 break;
-            case(5): // En T22 avec R7 et R1 et R2, A7d, A11b et PA3d, demande avancement T22
+            case(3): // En T22 avec R7 et R1 et R2, A7d, A11b et PA3d, demande avancement T22
                 write_demand(0x16, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(6): // En T27 avec R7, R1 et R2, lib R1
-                release_mutex(1, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+            case(4): // En T27 avec R7, R1 et R2, libère R1+R2
+                release_mutex(0b0000011, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
                 state ++; 
                 break; 
-            case(7): // En T27 avec R7 et R2, lib R2
-                release_mutex(2, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
-                state ++; 
-                break; 
-            case(8): // En T27 avec R7, demande avancement T27
+            case(5): // En T27 avec R7, demande avancement T27
                 write_demand( 0x1B, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(9): // En T28 avec R7, demande R5
-                take_mutex(5, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
+            case(6): // En T28 avec R7, demande R5
+                take_mutex(0b0010000, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
                 state ++; 
                 break; 
-            case(10): // En T28 avec R7 et R5, demande A13d 
+            case(7): // En T28 avec R7 et R5, demande A13d 
                 write_demand( 0xFFFF, 0xD, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(11): // En T28 avec R7 et R5, A13d , demande T28
+            case(8): // En T28 avec R7 et R5, A13d , demande T28
                 write_demand( 0x1C, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(12): // En Ti09 avec R7 et R5, lib R7
-                release_mutex(7, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+            case(9): // En Ti09 avec R7 et R5, lib R7
+                release_mutex(0b1000000, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
                 state ++; 
                 break; 
-            case(13): // En Ti09 avec R5, demande A12d
+            case(10): // En Ti09 avec R5, demande A12d
                 write_demand( 0xFFFF, 0xC, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(14): // En Ti09 avec R5 et A12d, demande avancement Tn09
+            case(11): // En Ti09 avec R5 et A12d, demande avancement Tn09
                 write_demand( 0x9, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(15): // En T24 avec R5, lib R5
-                release_mutex(5, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+            case(12): // En T24 avec R5, lib R5
+                release_mutex(0b0010000, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
                 state ++; 
                 break; 
-            case(16): // En T24, demande PA0d, A5d, A6d
+            case(13): // En T24, demande PA0d, A5d, A6d
                 write_demand(0xFFFF, 0x14, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++ ;
                 break;
-            case(17): // En T24, avec PA0d, A5d, A6d,  demande avancement T24
+            case(14): // En T24, avec PA0d, A5d, A6d,  demande avancement T24
                 write_demand(0x18, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state = 0;
                 break;

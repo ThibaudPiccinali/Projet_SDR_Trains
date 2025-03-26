@@ -178,68 +178,71 @@ int main(int argc, char *argv[]) {
     WriteInformation * write_info = (WriteInformation * )malloc(sizeof(WriteInformation)); 
     CHECK_ERROR(write_info, NULL, "malloc writeinfo");
 
-    /****************************** Réseau de pétri du train 3 **********************************/
+    /****************************** Réseau de pétri du train 4 **********************************/
     int state = 0; 
 
     while(1){
         switch(state){
-            case(0):
-                take_mutex(1, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
-                take_mutex(3, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
+            case(0): //En Ti07 demande R1+R2+R3
+                take_mutex(0b0000111, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
                 state++;
                 break; 
-            case(1):
+            case(1): //En Ti07 demande A10d+A9b+A8b+A7n
                 write_demand(0xFFFF, 0x0A, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state++;
                 break;
-            case(2):
+            case(2): //En Ti07 demande Tn07
                 write_demand(0x07, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info); 
                 state++;
                 break; 
-            case(3):
-                release_mutex(1, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
-                take_mutex(4, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
-                take_mutex(5, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
-                take_mutex(7, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
+            case(3): //En T29 demande R4+R5+R7
+                release_mutex(0b0000001, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+                take_mutex(0b1011000, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
                 state++;
                 break;
-            case(4):
+            case(4): //En T29 demande Tj3b+A13b
                 write_demand(0xFFFF, 0x21, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state++;
                 break;
-            case(5):
+            case(5): //En T29 demande T29
                 write_demand(0x1D, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(6):
-                release_mutex(3, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
-                release_mutex(4, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+            case(6): //En T09 relache R3+R4 puis demande inversion
+                release_mutex(0b0001100, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
                 write_demand(0x31, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(7):
+            case(7): //En T09 demande A13d
                 write_demand(0xFFFF, 0x0D, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(8):
+            case(8): //En T09 demande T09
                 write_demand(0x09, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(9):
-                release_mutex(5, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+            case(9): //En T28 libère R5 puis demande T28
+                release_mutex(0b0010000, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
                 write_demand(0x1C, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(10):
-                take_mutex(1, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
+            case(10): //En T27 prend R1+R2
+                take_mutex(0b0000011, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
                 state ++; 
                 break; 
-            case(11):
+            case(11): //En T27 demande Pa3b+A7b+A8b+A9d
                 write_demand(0xFFFF, 0x17, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(12):
+            case(12)://En T27 demande T27
                 write_demand(0x1B, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+                state ++,
+                break
+            case(14): //En T27 libère R1+R2
+                release_mutex(0b0000011, buff_emission, buff_reception, sd_ress, message_mutex_relachee);  
+                state ++,
+                break
+            case(13): //En Ti07 demande inversion
                 write_demand(0x25, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state = 0; 
                 break;

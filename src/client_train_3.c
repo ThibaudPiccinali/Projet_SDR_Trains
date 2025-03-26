@@ -184,87 +184,75 @@ int main(int argc, char *argv[]) {
 
     while(1){
         switch(state){
-        case(0):
+        case(0): // En Ti00 demande A0d
             write_demand(0xFFFF, 0x00, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state++;
             break; 
-        case(1):
+        case(1): //En Ti00 demande Pa2d
             write_demand(0xFFFF, 0x16, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state++;
             break;
-        case(2):
+        case(2): //En Ti00 demande Tn00
             write_demand(0x00, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state++;
             break; 
-        case(3):
+        case(3): //En T13 demande T13
             write_demand(0x0D, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state++;
             break;
-        case(4):
+        case(4): //En T20 demande T20
             write_demand(0x14, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state++;
             break;
-        case(5):
-            take_mutex(4, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
+        case(5): //En T30 demande R4+R5+R6
+            take_mutex(0b0111000, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
             state++;
             break; 
-        case(6):
-            take_mutex(5, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
-            state++;
-            break; 
-        case(7):
-            take_mutex(6, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
-            state++;
-            break; 
-        case(8):
+        case(6): //En T30 demande A14b + Tj2d ++ A12b
             write_demand(0xFFFF, 0x0E, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state++;
             break; 
-        case(9):
+        case(7): //En T30 demande A13b + Tj3d + A15b
             write_demand(0xFFFF, 0x0D, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state++;
             break; 
-        case(10):
+        case(8): //En T30 demande Pa1d
             write_demand(0xFFFF, 0x15, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state++;
             break; 
-        case(11):
+        case(9): //En T30 demande A1d
             write_demand(0xFFFF, 0x01, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state++;
             break; 
-        case(12):
+        case(10): //En T30 demande T30
             write_demand(0x1E, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state++;
             break; 
-        case(13):
-            release_mutex(6, buff_emission, buff_reception, sd_ress, message_mutex_relachee);
+        case(11): // En Ti09 relache R6
+            release_mutex(0b0100000, buff_emission, buff_reception, sd_ress, message_mutex_relachee);
             state++;
             break; 
-        case(14):
+        case(12): //En Ti09 demande Tn09
             write_demand(0x09, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state++;
             break; 
-        case(15):
-            release_mutex(4, buff_emission, buff_reception, sd_ress, message_mutex_relachee);
+        case(13): //En T31 relache R4+R5
+            release_mutex(0b0011000, buff_emission, buff_reception, sd_ress, message_mutex_relachee);
             state++;
             break; 
-        case(16):
-            release_mutex(5, buff_emission, buff_reception, sd_ress, message_mutex_relachee);
-            state++;
-            break; 
-        case(17):
+        case(14): //En T31 demande T31
             write_demand(0x1F, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state++;
             break; 
-        case(18):
+        case(15): //En T26 demande T26
             write_demand(0x1A, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state++;
             break; 
-        case(19):
+        case(16): //En  T15 demande T15
             write_demand(0x0F, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state++;
             break; 
-        case(20):
+        case(17): //En T12 demande T12
             write_demand(0x0C, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
             state = 0;
             break;        

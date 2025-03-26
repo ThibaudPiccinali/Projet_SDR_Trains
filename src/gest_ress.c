@@ -1,25 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <string.h>
+#include <pthread.h>
+#include <semaphore.h>
+
 #include <sys/fcntl.h>
 #include <errno.h>
 #include <time.h>
 #include <sched.h>
 #include <signal.h>
 #include <sys/wait.h>
-#include <string.h>
 #include <sys/types.h>          
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <semaphore.h>
 #include <sys/mman.h>
-
-#include "utils.h"
 
 #define NB_TRAINS 4
 
-#define NB_MUTEX 7
+#define NB_MUTEX (1<<8)
 #define NB_PROC_MAX_FA 50
 #define MAXOCTETS 150
 
@@ -34,20 +34,22 @@ void bye();
 
  // Memoire partagée
 struct file_attente {
-    pid_t file[NB_MUTEX][NB_PROC_MAX_FA]; // 50 personnes MAX dans chaque file d'attente
-    int longueurs[NB_MUTEX]; // Longueurs actuelles des files d'attente
+    pid_t file[NB_PROC_MAX_FA]; // 50 personnes MAX
+    int longueurs; // Longueurs actuelles de la file d'attente
+    int current_check; //La valeur actuellement check sur la file d'attente
 };
 struct file_attente* f_a;
 size_t size = sizeof(f_a);
 int shm_fd;
-
-sem_t* mutex[NB_MUTEX];
 
 int se[NB_TRAINS];
 int erreur;
 struct sockaddr_in adrserveur;
 struct sockaddr_in adrclient;
 socklen_t adrclient_len = sizeof(adrclient);
+
+unsigned char resources = 0b0000000; // 7 bits pour représenter les ressources
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc, char *argv[]) {
     
@@ -74,18 +76,10 @@ int main(int argc, char *argv[]) {
     CHECK_MAP(f_a = mmap(0, size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0),"mmap");
 
     // Initialisation de la file d'attente
-    for (int i = 0; i < NB_MUTEX; i++) {
-        f_a->longueurs[i] = 0;
-        for (int j = 0; j < NB_PROC_MAX_FA; j++) {
-            f_a->file[i][j] = 0;
-        }
-    }
-
-    // Création des mutex
-    char mutex_name[20];
-    for(int i = 0;i<NB_MUTEX;i++){
-        sprintf(mutex_name, "mutex[%d]", i);
-        CHECK_S(mutex[i] = sem_open(mutex_name,O_CREAT|O_EXCL,0666,1),"sem_open(mutex_name)");
+    f_a->longueurs = 0;
+    f_a->current_check = 0;
+    for (int j = 0; j < NB_PROC_MAX_FA; j++) {
+            f_a->file[j] = 0;
     }
 
     // Permet de faire le cleanning des sémaphores lors des exits
@@ -127,14 +121,6 @@ int main(int argc, char *argv[]) {
 }
 
 void bye(){
-    
-    // Fermeture et supression des sémaphores nommées
-    char mutex_name[20];
-    for(int i =0;i<NB_MUTEX;i++){
-        sprintf(mutex_name, "mutex[%d]", i);
-        CHECK(sem_close(mutex[i]),"sem_close(mutex_name)");
-        CHECK(sem_unlink(mutex_name),"sem_unlink(mutex_name)");
-    }
 
     // Suppression de la mémoire partagée
     CHECK(munmap(f_a, size),"munmap(file_attente)");
@@ -170,32 +156,43 @@ void train(int no){
             printf("Demande de prise de la mutex %d\n",atoi(num_mutex));
             if(atoi(num_mutex) <= NB_MUTEX && atoi(num_mutex) >0){
                 // On rajoute le client sur la file d'attente
-                if(f_a->longueurs[atoi(num_mutex)-1] < NB_PROC_MAX_FA){
+                if(f_a->longueurs < NB_PROC_MAX_FA){
                     sprintf(buff_emission, "Demande Mutex prise en compte");
                     CHECK(nbcar = send(client_sd, buff_emission, strlen(buff_emission) + 1, 0),"Problème d'émission !!!\n");
                     // Je me mets dans la file d'attente
-                    f_a->file[atoi(num_mutex)-1][f_a->longueurs[atoi(num_mutex)]] = getpid();
-                    f_a->longueurs[atoi(num_mutex)-1]++;
+                    f_a->file[f_a->longueurs] = getpid();
+                    f_a->longueurs++;
                     // J'attends que ce soit mon tour
                     while(1){
-                        if(f_a->file[atoi(num_mutex)-1][0]==getpid()){
-                            sleep(0.5); // Parce que si il n'y a pas d'attente et que le gestionnaire répond tout de suite, le client n'a pas le temps de capter la réponse
-                            break;
+                        if((f_a->current_check>0) && (f_a->file[f_a->current_check]==getpid())){
+                            pthread_mutex_lock(&lock);
+                            if((resources & atoi(num_mutex)) == 0){ // & logique bit à bit. Il faut que aucun bit soient en commun entre ceux demandés et ceux occupés
+                                sleep(0.5); // Parce que si il n'y a pas d'attente et que le gestionnaire répond tout de suite, le client n'a pas le temps de capter la réponse
+                                break;
+                            }
+                            else{
+                                f_a->current_check++; //Si les ressources ne sont pas dispo maintenant alors il faut passer au prochain demandeur dans la file d'attente
+                                if(f_a->current_check == f_a->longueurs){
+                                    f_a->current_check = 0;
+                                }
+                                pthread_mutex_unlock(&lock);
+                            }
                         }
                     }
                     // C'est mon tour
-                    // Je demande la mutex
-                    CHECK(sem_wait(mutex[atoi(num_mutex)-1]),"sem_wait(mutex[atoi(num_mutex)])");
-                    // Je l'obtiens
+                    resources |= atoi(num_mutex); // Prendre les ressources
+                    f_a->current_check = -1; //On met cette valeur temporaire le temps de faire nos modifications, afin d'éviter qu'un processus fils autre ne commence à prendre des ressources
                     // On met à jour la file d'attente
                     // Déplacer chaque élément vers la position précédente
-                    for (int i = 0; i < f_a->longueurs[atoi(num_mutex)] - 1; i++) {
-                        f_a->file[atoi(num_mutex)-1][i] = f_a->file[atoi(num_mutex)-1][i + 1];
+                    for (int i = f_a->current_check; i < f_a->longueurs - 1; i++) {
+                        f_a->file[i] = f_a->file[i + 1];
                     }
                     // Décrémenter la longueur de la file d'attente
-                    f_a->longueurs[atoi(num_mutex)-1]--;
+                    f_a->longueurs--;
                     // Mettre à jour le dernier élément (ici on le met à 0)
-                    f_a->file[atoi(num_mutex)-1][f_a->longueurs[atoi(num_mutex)-1]] = 0;
+                    f_a->file[f_a->longueurs] = 0;
+                    pthread_mutex_unlock(&lock);
+                    f_a->current_check = 0;
                     sprintf(buff_emission, "Mutex obtenue");
                     CHECK(nbcar = send(client_sd, buff_emission, strlen(buff_emission) + 1, 0),"Problème d'émission !!!\n");
                     printf("Mutex %d donnée\n",atoi(num_mutex));
@@ -219,7 +216,9 @@ void train(int no){
             strcpy(num_mutex, buff_reception + 1); // Copie à partir du deuxième caractère
             printf("Demande de restitution de la mutex %d\n",atoi(num_mutex));
             if(atoi(num_mutex) <= NB_MUTEX && atoi(num_mutex) >0){
-                CHECK(sem_post(mutex[atoi(num_mutex)-1]),"sem_post(mutex_name)");// On rend dispo la mutex
+                pthread_mutex_lock(&lock);
+                resources &= ~atoi(num_mutex); // Libérer les ressources
+                pthread_mutex_unlock(&lock);
                 sprintf(buff_emission, "Mutex restituée"); 
                 printf("Mutex %d restituée\n",atoi(num_mutex));
             }

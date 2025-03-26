@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
                 state++;
                 break;
             case(2): // En T23, demande R6
-                take_mutex(6, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
+                take_mutex(0b0100000, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
                 state++;
                 break; 
             case(3): // En T23 avec R6, demande Pa2d et Tj2d
@@ -204,50 +204,42 @@ int main(int argc, char *argv[]) {
                 state++;
                 break;
             case(5): // En Ti10, relache R6
-                release_mutex(6, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+                release_mutex((0b0100000, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
                 state ++; 
                 break; 
-            case(6): // En Ti10 sans R6, demande R3
-                take_mutex(3, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
+            case(6): // En Ti10 sans R6, demande R3 et R4
+                take_mutex(0b0001100, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
                 state ++; 
                 break; 
-            case(7): // En Ti10 avec R3, demande R4
-                take_mutex(4, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
+            case(7): // En Ti10 avec R3 et R4, demande Tj3d
+                write_demand(0xFFFF, 0x21, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(8): // En Ti10 avec R3 et R4, demande Tj3d
-                write_demand( 0xFFFF, 0x21, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+            case(8): // En Ti10 avec R3 et R4 et Tj3d, demande avancement Tn10
+                write_demand(0xA, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(9): // En Ti10 avec R3 et R4 et Tj3d, demande avancement Tn10
-                write_demand( 0xA, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+            case(9): // En T29 avec R3 et R4, libère R4
+                release_mutex(0b0001000, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
                 state ++; 
                 break; 
-            case(10): // En T29 avec R3 et R4, libère R4
-                release_mutex(4, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+            case(10): // En T29 avec R3, demande R2
+                take_mutex(0b0000010, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
                 state ++; 
                 break; 
-            case(11): // En T29 avec R3, demande R2
-                take_mutex(2, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
-                state ++; 
-                break; 
-            case(12): //En T29 avec R3 et R2, demande Pa3b, A11b et !!!A7d!!! (bloquant?)
+            case(11): //En T29 avec R3 et R2, demande Pa3b, A11b et !!!A7d!!! (bloquant?)
                 write_demand( 0xFFFF, 0x3, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(13): //En T29 avec R3 et R2, Pa3b, A11b et A7d , demande avancement T29
-                write_demand( 0x1D, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+            case(12): //En T29 avec R3 et R2, Pa3b, A11b et A7d , demande avancement T29
+                write_demand(0x1D, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(14): // En T19, avec R3 et R2, relache R3
-                release_mutex(3, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+            case(13): // En T19, avec R3 et R2, relache R2 et R3
+                release_mutex(0b0000110, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
                 state ++; 
                 break; 
-            case(15): // En T19, avec R2, relache R2
-                release_mutex(2, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
-                state ++; 
-                break; 
-            case(16): // En T19, demande T19
+            case(14): // En T19, demande T19
                 write_demand(0x13, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state = 0;
                 break;
