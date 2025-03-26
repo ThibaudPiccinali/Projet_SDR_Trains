@@ -39,7 +39,7 @@ struct file_attente {
     pid_t file[NB_PROC_MAX_FA]; // 50 personnes MAX
     int longueurs; // Longueurs actuelles de la file d'attente
     int current_check; //La valeur actuellement check sur la file d'attente
-    unsigned char resources = 0b0000000; // 7 bits pour représenter les ressources
+    unsigned char resources; // 7 bit pour représenter les ressources
 };
 struct file_attente* f_a;
 size_t size = sizeof(f_a);
@@ -51,7 +51,7 @@ struct sockaddr_in adrserveur;
 struct sockaddr_in adrclient;
 socklen_t adrclient_len = sizeof(adrclient);
 
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+sem_t* lock;
 
 int main(int argc, char *argv[]) {
     
@@ -84,6 +84,8 @@ int main(int argc, char *argv[]) {
     for (int j = 0; j < NB_PROC_MAX_FA; j++) {
             f_a->file[j] = 0;
     }
+
+    CHECK_S(lock = sem_open("lock",O_CREAT|O_EXCL,0666,1),"sem_open(lock)");
 
     // Permet de faire le cleanning des sémaphores lors des exits
     atexit(bye);// bye detruit les semaphores
@@ -130,7 +132,11 @@ void bye(){
     CHECK(close(shm_fd),"close(shm_fd)");
     CHECK(shm_unlink("file_attente"),"shm_unlink(file_attente)");
 
+    CHECK(sem_close(lock),"sem_close(lock)");
+    CHECK(sem_unlink("lock"),"sem_unlink(lock)");
+
 }
+
 
 void train(int no){
 
@@ -168,8 +174,8 @@ void train(int no){
                     // J'attends que ce soit mon tour
                     while(1){
                         if((f_a->current_check>0) && (f_a->file[f_a->current_check]==getpid())){
-                            pthread_mutex_lock(&lock);
-                            if((resources & atoi(num_mutex)) == 0){ // & logique bit à bit. Il faut que aucun bit soient en commun entre ceux demandés et ceux occupés
+                            CHECK(sem_wait(lock),"sem_wait(lock])");
+                            if((f_a->resources & atoi(num_mutex)) == 0){ // & logique bit à bit. Il faut que aucun bit soient en commun entre ceux demandés et ceux occupés
                                 sleep(0.5); // Parce que si il n'y a pas d'attente et que le gestionnaire répond tout de suite, le client n'a pas le temps de capter la réponse
                                 break;
                             }
@@ -178,12 +184,12 @@ void train(int no){
                                 if(f_a->current_check == f_a->longueurs){
                                     f_a->current_check = 0;
                                 }
-                                pthread_mutex_unlock(&lock);
+                                CHECK(sem_post(lock),"sem_post(lock)");
                             }
                         }
                     }
                     // C'est mon tour
-                    resources |= atoi(num_mutex); // Prendre les ressources
+                    f_a->resources |= atoi(num_mutex); // Prendre les ressources
                     f_a->current_check = -1; //On met cette valeur temporaire le temps de faire nos modifications, afin d'éviter qu'un processus fils autre ne commence à prendre des ressources
                     // On met à jour la file d'attente
                     // Déplacer chaque élément vers la position précédente
@@ -194,7 +200,7 @@ void train(int no){
                     f_a->longueurs--;
                     // Mettre à jour le dernier élément (ici on le met à 0)
                     f_a->file[f_a->longueurs] = 0;
-                    pthread_mutex_unlock(&lock);
+                    CHECK(sem_post(lock),"sem_post(lock)");
                     f_a->current_check = 0;
                     sprintf(buff_emission, "Mutex obtenue");
                     CHECK(nbcar = send(client_sd, buff_emission, strlen(buff_emission) + 1, 0),"Problème d'émission !!!\n");
@@ -219,9 +225,9 @@ void train(int no){
             strcpy(num_mutex, buff_reception + 1); // Copie à partir du deuxième caractère
             printf("Demande de restitution de la mutex %d\n",atoi(num_mutex));
             if(atoi(num_mutex) <= NB_MUTEX && atoi(num_mutex) >0){
-                pthread_mutex_lock(&lock);
-                resources &= ~atoi(num_mutex); // Libérer les ressources
-                pthread_mutex_unlock(&lock);
+                CHECK(sem_wait(lock),"sem_wait(lock)");
+                f_a->resources &= ~atoi(num_mutex); // Libérer les ressources
+                CHECK(sem_post(lock),"sem_wait(lock)");
                 sprintf(buff_emission, "Mutex restituée"); 
                 printf("Mutex %d restituée\n",atoi(num_mutex));
             }
