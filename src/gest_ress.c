@@ -17,6 +17,8 @@
 #include <sys/types.h>          
 #include <sys/mman.h>
 
+#include "utils.h"
+
 #define NB_TRAINS 4
 
 #define NB_MUTEX (1<<8)

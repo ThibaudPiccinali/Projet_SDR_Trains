@@ -236,12 +236,12 @@ int main(int argc, char *argv[]) {
                 break; 
             case(12)://En T27 demande T27
                 write_demand(0x1B, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-                state ++,
-                break
+                state ++;
+                break;
             case(14): //En T27 libère R1+R2
                 release_mutex(0b0000011, buff_emission, buff_reception, sd_ress, message_mutex_relachee);  
-                state ++,
-                break
+                state ++;
+                break;
             case(13): //En Ti07 demande inversion
                 write_demand(0x25, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state = 0; 

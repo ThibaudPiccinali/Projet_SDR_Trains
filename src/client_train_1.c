@@ -204,7 +204,7 @@ int main(int argc, char *argv[]) {
                 state++;
                 break;
             case(5): // En Ti10, relache R6
-                release_mutex((0b0100000, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+                release_mutex(0b0100000, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
                 state ++; 
                 break; 
             case(6): // En Ti10 sans R6, demande R3 et R4
