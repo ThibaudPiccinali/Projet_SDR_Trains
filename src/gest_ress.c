@@ -39,6 +39,7 @@ struct file_attente {
     pid_t file[NB_PROC_MAX_FA]; // 50 personnes MAX
     int longueurs; // Longueurs actuelles de la file d'attente
     int current_check; //La valeur actuellement check sur la file d'attente
+    unsigned char resources = 0b0000000; // 7 bits pour représenter les ressources
 };
 struct file_attente* f_a;
 size_t size = sizeof(f_a);
@@ -50,7 +51,6 @@ struct sockaddr_in adrserveur;
 struct sockaddr_in adrclient;
 socklen_t adrclient_len = sizeof(adrclient);
 
-unsigned char resources = 0b0000000; // 7 bits pour représenter les ressources
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 
 int main(int argc, char *argv[]) {
@@ -80,6 +80,7 @@ int main(int argc, char *argv[]) {
     // Initialisation de la file d'attente
     f_a->longueurs = 0;
     f_a->current_check = 0;
+    f_a->resources = 0b0000000; // 7 bits pour représenter les ressources
     for (int j = 0; j < NB_PROC_MAX_FA; j++) {
             f_a->file[j] = 0;
     }
