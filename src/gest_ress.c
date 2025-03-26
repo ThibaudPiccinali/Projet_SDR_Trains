@@ -158,28 +158,39 @@ void train(int no){
         CHECK(nbcar = recv(client_sd, buff_reception, MAXOCTETS, 0),"Problème de réception !!!\n");
         buff_reception[nbcar] = '\0';
         printf("MSG RECU DU CLIENT %d : %s\n",client_sd, buff_reception);
+
         // Faire ici des cas en fonction de la demande du client (demande ou restitution de Mutex)
         if(buff_reception[0]=='0'){
             // Demande de Mutex
             strcpy(num_mutex, buff_reception + 1); // Copie à partir du deuxième caractère
             printf("Demande de prise de la mutex %d\n",atoi(num_mutex));
+            
             if(atoi(num_mutex) <= NB_MUTEX && atoi(num_mutex) >0){
+
                 // On rajoute le client sur la file d'attente
                 if(f_a->longueurs < NB_PROC_MAX_FA){
+
                     sprintf(buff_emission, "Demande Mutex prise en compte");
                     CHECK(nbcar = send(client_sd, buff_emission, strlen(buff_emission) + 1, 0),"Problème d'émission !!!\n");
                     // Je me mets dans la file d'attente
+                    CHECK(sem_wait(lock),"sem_wait(lock])");
                     f_a->file[f_a->longueurs] = getpid();
                     f_a->longueurs++;
+                    CHECK(sem_post(lock),"sem_post(lock)");
                     // J'attends que ce soit mon tour
                     while(1){
-                        if((f_a->current_check>0) && (f_a->file[f_a->current_check]==getpid())){
-                            CHECK(sem_wait(lock),"sem_wait(lock])");
+                    	
+                    	
+                    
+                    	CHECK(sem_wait(lock),"sem_wait(lock])");
+                        if(f_a->file[f_a->current_check]==getpid()){
+
                             if((f_a->resources & atoi(num_mutex)) == 0){ // & logique bit à bit. Il faut que aucun bit soient en commun entre ceux demandés et ceux occupés
                                 sleep(0.5); // Parce que si il n'y a pas d'attente et que le gestionnaire répond tout de suite, le client n'a pas le temps de capter la réponse
                                 break;
                             }
                             else{
+
                                 f_a->current_check++; //Si les ressources ne sont pas dispo maintenant alors il faut passer au prochain demandeur dans la file d'attente
                                 if(f_a->current_check == f_a->longueurs){
                                     f_a->current_check = 0;
@@ -187,15 +198,22 @@ void train(int no){
                                 CHECK(sem_post(lock),"sem_post(lock)");
                             }
                         }
+                        else{
+                                CHECK(sem_post(lock),"sem_post(lock)");
+                        }
+                        sleep(0.5);
                     }
                     // C'est mon tour
+                    
                     f_a->resources |= atoi(num_mutex); // Prendre les ressources
-                    f_a->current_check = -1; //On met cette valeur temporaire le temps de faire nos modifications, afin d'éviter qu'un processus fils autre ne commence à prendre des ressources
                     // On met à jour la file d'attente
                     // Déplacer chaque élément vers la position précédente
+                    
                     for (int i = f_a->current_check; i < f_a->longueurs - 1; i++) {
+
                         f_a->file[i] = f_a->file[i + 1];
                     }
+
                     // Décrémenter la longueur de la file d'attente
                     f_a->longueurs--;
                     // Mettre à jour le dernier élément (ici on le met à 0)
@@ -203,6 +221,7 @@ void train(int no){
                     CHECK(sem_post(lock),"sem_post(lock)");
                     f_a->current_check = 0;
                     sprintf(buff_emission, "Mutex obtenue");
+                    
                     CHECK(nbcar = send(client_sd, buff_emission, strlen(buff_emission) + 1, 0),"Problème d'émission !!!\n");
                     printf("Mutex %d donnée\n",atoi(num_mutex));
                 }

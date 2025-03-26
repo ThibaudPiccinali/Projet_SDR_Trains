@@ -23,7 +23,7 @@
 #define DEFAULT_REMOTE_IP     "127.0.0.1"
 #define MAXOCTETS   150
 #define IP_AUTOMATE "10.31.125.14"
-#define XWAY_ADRESS 33
+#define XWAY_ADRESS 34
 #define NUM_TRAIN 52
 
 #define IP_SIZE 16
@@ -187,24 +187,24 @@ int main(int argc, char *argv[]) {
                 take_mutex(0b0000111, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
                 state++;
                 break; 
-            case(1): //En Ti07 demande A10d+A9b+A8b+A7n
+            case(1): //En Ti07 (avec R1+R2+R3) demande A10d+A9b+A8b+A7n
                 write_demand(0xFFFF, 0x0A, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state++;
                 break;
-            case(2): //En Ti07 demande Tn07
+            case(2): //En Ti07 (avec R1+R2+R3) demande Tn07
                 write_demand(0x07, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info); 
                 state++;
                 break; 
-            case(3): //En T29 demande R4+R5+R7
-                release_mutex(0b0000001, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
+            case(3): //En T29 libère R1+R2 puis demande R4+R5+R7
+                release_mutex(0b0000011, buff_emission, buff_reception, sd_ress, message_mutex_relachee); 
                 take_mutex(0b1011000, buff_emission, buff_reception, sd_ress, message_mutex_demandee);
                 state++;
                 break;
-            case(4): //En T29 demande Tj3b+A13b
+            case(4): //En T29 (avec R3+R4+R5+R7) demande Tj3b+A13b
                 write_demand(0xFFFF, 0x21, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state++;
                 break;
-            case(5): //En T29 demande T29
+            case(5): //En T29 (avec R3+R4+R5+R7) demande T29
                 write_demand(0x1D, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
@@ -213,11 +213,11 @@ int main(int argc, char *argv[]) {
                 write_demand(0x31, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(7): //En T09 demande A13d
+            case(7): //En T09 (avec R5+R7) demande A13d
                 write_demand(0xFFFF, 0x0D, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(8): //En T09 demande T09
+            case(8): //En T09 (avec R5+R7) demande T09
                 write_demand(0x09, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
@@ -226,26 +226,30 @@ int main(int argc, char *argv[]) {
                 write_demand(0x1C, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(10): //En T27 prend R1+R2
+            case(10): //En T27 (avec R7) prend R1+R2
                 take_mutex(0b0000011, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
                 state ++; 
                 break; 
-            case(11): //En T27 demande Pa3b+A7b+A8b+A9d
+            case(11): //En T27 (avec R1+R2+R7) demande Pa3b+A7b+A8b+A9d
                 write_demand(0xFFFF, 0x17, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++; 
                 break; 
-            case(12)://En T27 demande T27
+            case(12)://En T27 (avec R1+R2+R7) demande T27
                 write_demand(0x1B, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
                 state ++;
                 break;
-            case(14): //En T27 libère R1+R2
-                release_mutex(0b0000011, buff_emission, buff_reception, sd_ress, message_mutex_relachee);  
+            case(13): //En T27 (avec R1+R2+R7) libère R1+R2+R7
+                release_mutex(0b1000011, buff_emission, buff_reception, sd_ress, message_mutex_relachee);  
                 state ++;
                 break;
-            case(13): //En Ti07 demande inversion
+            case(14): //En Ti07 demande avancé C40
                 write_demand(0x25, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
-                state = 0; 
+                state++;
                 break;
+            case(15): //En Ti07 demande inversion
+                write_demand(0x2F, 0xFFFF, NUM_TRAIN, sd_api, pc_adress, api_xway_adress, write_info);
+                state = 0;
+                break; 
 
         }
     }

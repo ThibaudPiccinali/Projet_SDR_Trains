@@ -23,7 +23,7 @@
 #define DEFAULT_REMOTE_IP     "127.0.0.1"
 #define MAXOCTETS   150
 #define IP_AUTOMATE "10.31.125.14"
-#define XWAY_ADRESS 33
+#define XWAY_ADRESS 31
 #define NUM_TRAIN 39
 
 #define IP_SIZE 16

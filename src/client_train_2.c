@@ -17,7 +17,7 @@
 #define DEFAULT_REMOTE_IP     "127.0.0.1"
 #define MAXOCTETS   150
 #define IP_AUTOMATE "10.31.125.14"
-#define XWAY_ADRESS 33
+#define XWAY_ADRESS 32
 #define NUM_TRAIN 42
 
 #define IP_SIZE 16
@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
                 state++;
                 break; 
             case(1): // En T22, demande R1+R2+R7
-                take_mutex(0b1000110, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
+                take_mutex(0b1000011, buff_emission, buff_reception, sd_ress, message_mutex_demandee); 
                 state++;
                 break;
             case(2): // En T22 avec R7 et R1 et R2, demande A7d, A11b et PA3d
